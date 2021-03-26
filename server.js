@@ -241,3 +241,41 @@ const addEmployees = () => {
     });
   });
 };
+
+const viewDepartments = () => {
+  connection.query("SELECT * FROM department", (err, res) => {
+    if (err) throw err;
+    printTable(res);
+    mainMenu();
+  });
+};
+
+const viewRoles = () => {
+  connection.query(
+    `SELECT roles.id, roles.title, roles.salary, (department.department_name) department
+    FROM roles 
+    LEFT JOIN department
+    ON roles.department_id = department.id;`,
+    (err, res) => {
+      if (err) throw err;
+      printTable(res);
+      mainMenu();
+    }
+  );
+};
+
+const viewEmployees = () => {
+  connection.query(
+    `SELECT employee.id, employee.first_name, employee.last_name, roles.title, CONCAT(manager.first_name, " ", manager.last_name) manager
+    FROM employee 
+    LEFT JOIN roles 
+    ON employee.role_id=roles.id
+    LEFT JOIN employee manager
+    ON manager.id=employee.manager_id;`,
+    (err, res) => {
+      if (err) throw err;
+      printTable(res);
+      mainMenu();
+    }
+  );
+};
