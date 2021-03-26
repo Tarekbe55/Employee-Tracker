@@ -362,3 +362,120 @@ onst updateEmployeeMgr = () => {
       });
   });
 };
+
+const viewEmployeeByMgr = () => {
+  connection.query(
+    `SELECT CONCAT(manager.first_name, " ", manager.last_name) manager, CONCAT(employee.first_name, ' ', employee.last_name) AS employee, roles.title
+    FROM employee 
+    LEFT JOIN employee manager
+    ON manager.id=employee.manager_id
+	  INNER JOIN roles 
+    ON employee.role_id=roles.id
+    ORDER BY manager;`,
+    (err, res) => {
+      if (err) throw err;
+      printTable(res);
+      mainMenu();
+    }
+  );
+};
+
+const removeEmployee = () => {
+  connection.query("SELECT * FROM employee", (err, res) => {
+    let arr = res.map((employee) => {
+      return {
+        name: employee.first_name + " " + employee.last_name,
+        value: employee.id,
+      };
+    });
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          message: `"Which employee would you like to remove?"`,
+          name: "terminate",
+          choices: arr,
+        },
+      ])
+      .then((remove) => {
+        let removeThis = remove.terminate;
+        connection.query(`DELETE FROM employee WHERE id=${removeThis}`);
+        if (err) throw err;
+        console.log("Employee successfully removed.");
+        mainMenu();
+      });
+  });
+};
+
+const removeRole = () => {
+  connection.query("SELECT * FROM roles", (err, res) => {
+    let arr = res.map((roles) => {
+      return {
+        name: roles.title,
+        value: roles.id,
+      };
+    });
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          message: `"Which role would you like to remove?"`,
+          name: "terminate",
+          choices: arr,
+        },
+      ])
+      .then((remove) => {
+        let removeThis = remove.terminate;
+        connection.query(`DELETE FROM roles WHERE id=${removeThis}`);
+        if (err) throw err;
+        console.log("Role successfully removed.");
+        mainMenu();
+      });
+  });
+};
+
+const removeDept = () => {
+  connection.query("SELECT * FROM department", (err, res) => {
+    let arr = res.map((department) => {
+      return {
+        name: department.department_name,
+        value: department.id,
+      };
+    });
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          message: `"Which department would you like to remove?"`,
+          name: "terminate",
+          choices: arr,
+        },
+      ])
+      .then((remove) => {
+        let removeThis = remove.terminate;
+        connection.query(`DELETE FROM department WHERE id=${removeThis}`);
+        if (err) throw err;
+        console.log("Department successfully removed.");
+        mainMenu();
+      });
+  });
+};
+
+const departmentBudget = () => {
+  connection.query(
+    `SELECT department_id AS id, 
+    department.department_name AS departments,
+    SUM(salary) AS salaries
+    FROM  roles  
+    INNER JOIN department ON roles.department_id = department.id GROUP BY roles.department_id;`,
+    (err, res) => {
+      if (err) throw err;
+      printTable(res);
+      mainMenu();
+    }
+  );
+
+};
+
+init();
+
