@@ -131,3 +131,51 @@ const addDepartment = () => {
       );
     });
 };
+
+const addRoles = () => {
+  connection.query("SELECT * FROM department", (err, res) => {
+    const dept = res.map((dept) => {
+      return {
+        name: dept.department_name,
+        value: dept.id,
+      };
+    });
+    if (err) throw err;
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          message: "What is the name of the role you are adding?",
+          name: "title",
+        },
+        {
+          type: "input",
+          message: "What is the salary of the role you are adding?",
+          name: "salary",
+        },
+        {
+          type: "list",
+          message: "What is the department of the role?",
+          name: "department_id",
+          choices: dept,
+        },
+
+        //need to join with department id?
+      ])
+      .then((response) => {
+        connection.query(
+          "INSERT INTO roles SET ?",
+          {
+            title: response.title,
+            salary: response.salary,
+            department_id: response.department_id,
+          },
+          (err) => {
+            if (err) throw err;
+            console.log("Your role was created successfully!");
+            mainMenu();
+          }
+        );
+      });
+  });
+};
