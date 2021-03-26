@@ -179,3 +179,65 @@ const addRoles = () => {
       });
   });
 };
+
+const addEmployees = () => {
+  connection.query("SELECT * FROM roles", (err, res) => {
+    const roles = res.map((roles) => {
+      return {
+        name: roles.title,
+        value: roles.id,
+      };
+    });
+    connection.query("SELECT * FROM employee", (err, data) => {
+      const manager = data.map((employee) => {
+        return {
+          name: employee.first_name + " " + employee.last_name,
+          value: employee.id,
+        };
+      });
+      inquirer
+        .prompt([
+          {
+            type: "input",
+            message: "What is the first name of the employee?",
+            name: "first_name",
+          },
+          {
+            type: "input",
+            message: "What is the last name of the employee?",
+            name: "last_name",
+          },
+          {
+            type: "list",
+            message: "What is the employees role?",
+            name: "role",
+            choices: roles,
+          },
+          {
+            type: "list",
+            message: "Who is this employee's manager?",
+            name: "manager",
+            choices: manager,
+          },
+
+          //need to join with roles_id and manager_id
+        ])
+        .then((response) => {
+          connection.query(
+            "INSERT INTO employee SET ?",
+            {
+              first_name: response.first_name,
+              last_name: response.last_name,
+              role_id: response.role,
+              manager_id: response.manager,
+            },
+            (err) => {
+              if (err) throw err;
+              console.log("Your employee was created successfully!");
+              mainMenu();
+            }
+          );
+        });
+    });
+  });
+};
